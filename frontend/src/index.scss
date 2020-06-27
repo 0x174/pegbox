@@ -1,0 +1,62 @@
+@import url('https://fonts.googleapis.com/css2?family=Bungee+Outline&family=Open+Sans&display=swap');
+
+/* I generally work in a very minimal black and white style for my own things
+*  and leave coloring in better hands, but I thought it would be fun to do more
+* stylized work in this context.
+*/
+
+/* Colors generated via https://coolors.co/*/
+
+$background-color: #002A32;
+$explanatory-text-color: #E8EDDF;
+$highlight-text-color: #F40076;
+$link-text-color: #EBA6A9;
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+  'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+  sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+  monospace;
+}
+
+.splash {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  color: white;
+  background-color: $background-color;
+}
+
+.pegbox-logo {
+  position: absolute;
+  top: 0;
+  left: 0;
+  margin: .1em .2em .2em .2em;
+  padding: 0 0 0 0;
+  display: inline-block;
+
+  h1 {
+    font-family: 'Bungee Outline', sans-serif;
+    color: $highlight-text-color;
+    text-decoration: underline;
+    margin-block-start: 0.2em;
+    margin-block-end: 0.2em;
+
+  }
+
+  h2 {
+    font-family: 'Open Sans', sans-serif;
+    color: $highlight-text-color;
+    font-size: 22px;
+  }
+}
