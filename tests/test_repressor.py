@@ -106,7 +106,7 @@ def test_gate_instantiation(generate_s1_gate):
     assert s1 is not None
 
 
-def test_response_function_calculation(generate_s1_gate):
+def test_response_function_calculation(generate_s1_gate, generate_ptet):
     '''
 
     Args:
@@ -116,8 +116,10 @@ def test_response_function_calculation(generate_s1_gate):
 
     '''
     s1 = generate_s1_gate
-    s1.set_chemical_inputs(0.0013, 0)
-    assert s1.calculate_response_function() == 1.2965149647184224
+    ptet = generate_ptet
+    s1.set_biological_inputs([ptet])
+    assert s1.calculate_response_function([0b0101]) == \
+           pytest.approx(1.2965149647184224, 0.1)
 
 
 def test_logic_gate_setting(generate_s1_gate):
@@ -134,15 +136,15 @@ def test_connected_gates(generate_s1_gate, generate_p1_gate):
 
     '''
     s1 = generate_s1_gate
-    s1.set_chemical_inputs((0.0013, 4.4))
+    s1.set_biological_inputs([0.0013, 4.4])
     s1.set_logical_function('NOT')
     s1.set_logical_inputs([0b0101])
     p1 = generate_p1_gate
-    p1.set_chemical_inputs(0.0025, s1)
+    p1.set_biological_inputs([0.0025, s1])
     p1.set_logical_inputs([0b0011, s1])
     p1.set_logical_function('NOR')
     assert p1.get_logical_output() == 0b100
-    assert p1.calculate_response_function() == 0.01000110656742123
+    assert p1.calculate_response_function([0b0011]) == 0.01000110656742123
 
 
 def test_circuit_score(generate_s1_gate, generate_p1_gate, generate_plux_star, generate_ptet):
@@ -150,6 +152,6 @@ def test_circuit_score(generate_s1_gate, generate_p1_gate, generate_plux_star, g
     p1 = generate_p1_gate
     plux = generate_plux_star
     ptet = generate_ptet
-    s1.set_chemical_inputs([ptet])
-    p1.set_chemical_inputs([plux, s1])
+    s1.set_biological_inputs([ptet])
+    p1.set_biological_inputs([plux, s1])
     s1.score_self()
