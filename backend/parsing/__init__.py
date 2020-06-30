@@ -1,1 +1,1 @@
-from .parse_ucf import parse_ucf_file
+from .parser import parse_ucf_file

@@ -73,7 +73,7 @@ class CelloAuth:
             Whether the username and password are valid.
         '''
         for i in range(REQUEST_RETRIES):
-            if i-1 >= REQUEST_RETRIES:
+            if i - 1 >= REQUEST_RETRIES:
                 raise RuntimeError(
                     'Unable to communicate with Cello  after three attempts. '
                     'Please investigate internet connection or Cello API Status'
@@ -94,22 +94,34 @@ class CelloAuth:
 
     def __enter__(self):
         '''
-        Upon
-        Returns:
+        This enforces authentication before we do any kind of operation on the
+        remote API.
 
+        Returns:
+            An HTTP Auth object to pass into the requests get call
         '''
         self.validate_authentication()
         return self.auth
 
     def __exit__(self, exc_type, exc_val, exc_tb):
+        '''
+        Simple pass for when we exit the context manager.
+
+        Args:
+            exc_type: Execution Type
+            exc_val: Execution Value
+            exc_tb: Execution Traceback
+
+        '''
         pass
 
 
 class CelloAPI:
     '''
+    Allows access to the CelloAPI as either an object or as a CLI entrypoint.
 
-    Returns:
-
+    The purpose of this division is to allow users to extend or automate their
+    own interactions with CelloCAD or to allow a backwards compatible CLI.
     '''
 
     def __init__(
@@ -129,8 +141,13 @@ class CelloAPI:
 
     def parse_cli_command(self, routing_command: str, kwargs: Dict):
         '''
+        Parses and routes CLI centric commands. Currently having some issues
+        with communicating with Cello V2 remote API, so these are mostly
+        placeholders.
 
-        Returns:
+        Args:
+            routing_command: What command to execute.
+            kwargs: Additional argument to the command line function.
 
         '''
         if routing_command == 'in_out':
@@ -151,16 +168,17 @@ class CelloAPI:
             end_point: str,
             additional_arguments: dict = None,
             operation: str = 'GET',
-    ):
+    ) -> requests.request:
         '''
+        Interacts with an API endpoint.
 
         Args:
-            end_point:
-            operation:
-            additional_arguments:
+            end_point: Which endpoint to interact with.
+            operation: What operation to use [`POST` | `GET` | `DELETE`]
+            additional_arguments: Additional arguments to the end point.
 
         Returns:
-
+            Unicode encoded message content.
         '''
         with self.auth as cello_auth:
             base_endpoint = f'{self.base_url}/{end_point}'
@@ -189,15 +207,16 @@ class CelloAPI:
             filename: str = None
     ):
         '''
+        Gets result from end point
 
         Args:
-            job_id:
-            keyword:
-            extension:
-            filename:
+            job_id: Job Identification Number
+            keyword: Which keyword to search for, if passed in.
+            extension: Which extension to search for, if passed in.
+            filename: Which filename to search for, if passed in.
 
         Returns:
-
+            Remote endpoint body content, encoded in unicode.
         '''
         params = {}
         if job_id is None:
@@ -217,12 +236,15 @@ class CelloAPI:
 
     def get_inputs(self, name: str = None):
         '''
+        Gets the valid inputs to repressors/gates. These are biological signals
+        and their associated dna sequence.
 
         Args:
-            name:
+            name: What name to look for, if passed in. If not passed in we
+            just get all possible inputs.
 
         Returns:
-
+            Remote endpoint body content, encoded in unicode.
         '''
         if name is not None:
             params = {
@@ -237,12 +259,16 @@ class CelloAPI:
 
     def get_outputs(self, name: str = None):
         '''
+        Gets the valid outputs for the genetic circuit. These are typically
+        (in the toy problem) fluorescent proteins or common signaling outputs 
+        and their associated genetic sequence. 
 
         Args:
-            name:
+            name: Which output to look for, if passed in. If not passed in we
+                fetch all possible outputs.
 
         Returns:
-
+            Remote endpoint body content, encoded in unicode.
         '''
         if name is not None:
             params = {
@@ -258,22 +284,23 @@ class CelloAPI:
     def post_input(
             self,
             name: str,
-            low: float,
-            high: float,
-            dnaseq: str,
+            low_signal: float,
+            high_signal: float,
+            dna_sequence: str,
     ):
         '''
+        Creates an input file on the server.
 
         Args:
-            name:
-            low:
-            high:
-            dnaseq:
+            name: Name of the input signal. (e.g., pLux, pTet)
+            low_signal: Signal value when it's 'low'
+            high_signal: Signal value when it's 'high'
+            dna_sequence: The DNA sequence of the input signal.
 
         Returns:
-
+            Remote endpoint body content, encoded in unicode.
         '''
-        file_string = f'{name} {low} {high} {dnaseq}\n'
+        file_string = f'{name} {low_signal} {high_signal} {dna_sequence}\n'
         params = {
             'filename': f'input_{name}.text',
             'filetext': file_string,
@@ -282,12 +309,13 @@ class CelloAPI:
 
     def delete_input(self, name: str):
         '''
+        Deletes an input.
 
         Args:
-            name:
+            name: The name of the input to delete.
 
         Returns:
-
+            Remote endpoint body content, encoded in unicode.
         '''
         params = {
             'filename': f'input_{name}.text'
@@ -296,11 +324,13 @@ class CelloAPI:
 
     def delete_output(self, name: str):
         '''
+        Deletes an output.
 
         Args:
-            name:
+            name: The name of the output to delete
 
         Returns:
+            Remote endpoint body content, encoded in unicode.
 
         '''
         params = {
@@ -310,12 +340,18 @@ class CelloAPI:
 
     def netsynth(self, verilog_fp: str):
         '''
+        Validates a passed in verilog specification file.
+
+        (I'm a bit confused here, documentation says that this only serves
+        as a mechanism for validation. I would assume that there might be some
+        parsing of the verilog file into a valid circuit. Perhaps covered in
+        Submit and this is just safety checking?)
 
         Args:
-            verilog_fp:
+            verilog_fp: Filepath to verilog file.
 
         Returns:
-
+            Remote endpoint body content, encoded in unicode.
         '''
         try:
             verilog_text = open(verilog_fp, 'r').read()
@@ -338,15 +374,20 @@ class CelloAPI:
             options: str = None,
     ):
         '''
+        Runs Cello.
 
         Args:
-            job_id:
-            verilog_fp:
-            inputs_fp:
-            outputs_fp:
-            options:
+            job_id: Identification Number for the Job.
+            verilog_fp: Filepath to the Verilog file.
+            inputs_fp: Filepath to the inputs to the circuit.
+            outputs_fp: Filepath to the outputs to the circuit.
+            options: Additional Options. Example given in API documentation 
+                are:
+                    `-figures false -plasmid false -assignment_algorithm 
+                    hill_climbing`
 
         Returns:
+            Remote endpoint body content, encoded in unicode.
 
         '''
         try:
@@ -369,18 +410,19 @@ class CelloAPI:
     def fetch_extension(
             self,
             job_id: str,
-            assignment: str,
             extension: str,
+            assignment: str = None,
     ):
         '''
+        Fetches an extension.
 
         Args:
-            job_id:
-            assignment:
-            extension:
+            job_id: Identification Number for the Job.
+            extension: Which file extension to look for.
+            assignment: Which assignment to look for, if passed in.
 
         Returns:
-
+            Remote endpoint body content, encoded in unicode.
         '''
         params = {
             'job_id': job_id,
@@ -396,13 +438,11 @@ class CelloAPI:
 
     def show_parts(self, job_id: str, assignment: str = None):
         '''
+        Prints all available parts to console/terminal.
 
         Args:
-            job_id:
-            assignment:
-
-        Returns:
-
+            job_id: Identification Number for the Job.
+            assignment: Which assignment to look for, if passed in.
         '''
         resp = self.fetch_extension(job_id, assignment, 'parts_list.txt')
         filenames = json.loads(resp)
@@ -412,8 +452,6 @@ class CelloAPI:
         for filename in filenames:
             params['filename'] = filename
             resp = self.fetch_resource(f'results', params)
-            # TODO: This parsing dance might be simplified but I need to
-            # investigate.
             parts = '[' + resp.split('[')[1]
             parts = parts.replace('[', '[\"')
             parts = parts.replace(']', '\"]')
@@ -428,6 +466,15 @@ class CelloAPI:
             assignment,
             extension,
     ):
+        '''
+        Fetches file contents.
+        
+        Args:
+            job_id: Identification Number for the Job
+            assignment: Which assignment to look for
+            extension:  Which file extension to look for
+
+        '''
 
         resp = self.fetch_extension(job_id, assignment, extension)
         filenames = json.loads(resp)
@@ -436,7 +483,7 @@ class CelloAPI:
         }
         for filename in filenames:
             params['filename'] = filename
-            self.fetch_resource('results', params)
+            print(Fore.GREEN + f"{self.fetch_resource('results', params)}")
 
     def show_reu_table(
             self,
@@ -444,19 +491,18 @@ class CelloAPI:
             assignment: str,
     ):
         '''
-
+        Shows the REU Table.
+        
         Args:
-            job_id:
-            assignment:
+            job_id: Identification Number for the Job.
+            assignment: Which assignment to look for
 
         Returns:
 
+
         '''
-        self.fetch_extension(
-            job_id=job_id,
-            assignment=assignment,
-            extension='reutable.txt'
-        )
+        print(Fore.GREEN +
+              f"{self.fetch_extension(job_id=job_id, assignment=assignment, extension='reutable.txt')}")
 
     def read_genbank(
             self,
@@ -465,17 +511,16 @@ class CelloAPI:
             seq: bool = False,
     ):
         '''
+        Reads the passed in Genbank file.
 
         Args:
-            job_id:
-            filename:
-            seq:
-
-        Returns:
+            job_id: Identification Number for the Job.
+            filename: Filename of Genbank file.
+            seq: Flag that determines if the sequence of the associated 
+                Genbank file will be printed.
 
         '''
-        # This is a bit interesting and deviates from all of the other
-        # established patterns.
+        # This is a bit interesting and deviates from the other established patterns.
         resp = self.fetch_resource('resultsroot')
         server_root = resp
         params = {
@@ -507,13 +552,14 @@ class CelloAPI:
 
     def post_ucf(self, name: str, filepath: str):
         '''
+        Posts a UCF (User Constraint File) to the server.
 
         Args:
-            name:
-            filepath:
+            name: Name of the file
+            filepath: Filepath to the UCF file.
 
         Returns:
-
+            Remote endpoint body content, encoded in unicode.
         '''
         if not name.endswith('.UCF.json'):
             raise RuntimeError(
@@ -525,20 +571,17 @@ class CelloAPI:
         params = {
             'filetext': json.dumps(filejson),
         }
-        # TODO: Test this, it deviates from the patterns set forth by the
-        # other ones. I think he's actually trying to push arguments via
-        # requests instead of just using the params thing as a way to create
-        # filetree paths.
         return self.fetch_resource('ucf', params)
 
     def validate_ucf(self, name: str):
         '''
+        Validates a UCF (User Constraint File) on the server.
 
         Args:
-            name:
+            name: Name of the file
 
         Returns:
-
+            Remote endpoint body content, encoded in unicode.
         '''
         if not name.endswith('.UCF.json'):
             raise RuntimeError(
@@ -552,12 +595,13 @@ class CelloAPI:
 
     def delete_ufc(self, name: str):
         '''
+        Deletes a UCF (User Constraint File) on the server.
 
         Args:
-            name:
+            name: Name of the file
 
         Returns:
-
+            Remote endpoint body content, encoded in unicode.
         '''
         if not name.endswith('.UCF.json'):
             raise RuntimeError(

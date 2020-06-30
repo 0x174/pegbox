@@ -1,20 +1,43 @@
-# pegbox/backend/parse_ucf.py
-# Parses a user constraint file and generates requisite datastructures.
-# TODO: MAKE WORDS GOOD
+"""
+backend.parsing.parser
+
+Functionality responsible for parsing UCF and Verilog files for the purpose
+of intake into the optimization program as a whole.
+
+W.R. Jackson 2020
+"""
 import json
-import pandas as pd
-# TODO: Relative imports are bad form.
-from ..datastructures import Library
+from backend.datastructures import (
+    Library,
+)
 
 
-def _pop_and_assign(ucf_entry: dict):
+def _pop_and_assign(ucf_entry: dict) -> dict:
+    '''
+    Convenience function to remove some of the spurious data from the JSON and
+    then return the value. Done to reduce boilerplate in parsing function.
+
+    Args:
+        ucf_entry: The input dictionary to remove values from.
+
+    Returns:
+        The input dictionary sans collection field.
+    '''
     ucf_entry.pop('collection')
     return ucf_entry
 
 
 def _pop_and_insert(ucf_entry: dict, container: dict):
-    # Some of these don't
-    key = None
+    '''
+    Removes spurious data from input dictionary, generates a label if one
+    does not exist, and then assigns the value to the passed in container
+    dictionary.
+
+    Args:
+        ucf_entry: The input dictionary from the UCF file.
+        container: The container endpoint for the dictionary.
+
+    '''
     if 'name' not in ucf_entry:
         key = len(container) + 1
     else:
@@ -26,10 +49,12 @@ def _pop_and_insert(ucf_entry: dict, container: dict):
 
 def parse_ucf_file(filepath: str):
     '''
-
+    Parses in the passed in UCF (User Constraint File). Files are assigned
+    to a global singleton due to the UCF acting as the global point of reference
+    for the optimization program.
 
     Args:
-        filepath:
+        filepath: The filepath to the UCF FIle.
 
     Returns:
 
@@ -95,10 +120,14 @@ def parse_ucf_file(filepath: str):
         pass
 
 def parse_verilog_file():
-    # God I don't want to use pandas
+    '''
+
+    Returns:
+
+    '''
     pass
 
 
 
 if __name__ == '__main__':
-    parse_ucf_file('../../example.json')
+    parse_ucf_file('../../example_ucf.json')
