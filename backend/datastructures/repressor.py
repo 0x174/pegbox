@@ -249,8 +249,7 @@ class Repressor:
         Gets the logical output of the repressor.
 
         Returns:
-
-
+            The logical output of the repressor.
         '''
         computed_input_signals = []
         for input_signal in self.logical_inputs:
@@ -302,7 +301,6 @@ class Repressor:
             A numpy array of coefficients for the repressor. These are
             represented by an ndarray of float64 to avoid floating point
             error.
-
         '''
         return np.asarray(
             [

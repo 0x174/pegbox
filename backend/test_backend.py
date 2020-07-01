@@ -12,7 +12,6 @@ from backend import (
     InputSignal,
     Repressor,
     optimize_repressor,
-    graph_response_function,
 )
 
 # -------------------------------- Test Fixtures -------------------------------
