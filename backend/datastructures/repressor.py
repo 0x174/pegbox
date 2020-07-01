@@ -100,7 +100,7 @@ class Repressor:
         self.logical_output: bool = None
         self.logical_inputs: [List[Union[int, Repressor]]] = None
 
-    def calculate_response_function(self, logical_inputs: List[bool]) -> float:
+    def calculate_response_function(self) -> float:
         '''
         Calculates the response function of the repressor as per the equation
         on page 3 of the homework. The repressor calculation looks like:
@@ -116,13 +116,17 @@ class Repressor:
             The biological output of the circuit
         '''
         current_x = 0
+        signal_index = 1 if self.get_logical_output() else 0
         for index, input_signal in enumerate(self.biological_inputs):
             if type(input_signal) is Repressor:
-                current_x += input_signal.calculate_response_function(
-                    [logical_inputs[index]]
-                )
-            if type(input_signal) is float:
-                current_x += input_signal
+                current_x += input_signal.calculate_response_function()
+            if type(input_signal) is tuple:
+                current_x += input_signal[signal_index]
+            if type(input_signal) is InputSignal:
+                if signal_index:
+                    current_x += input_signal.on_value
+                else:
+                    current_x += input_signal.off_value
         self.biological_output = self.y_min + (
                 (self.y_max - self.y_min) /
                 (1.0 + (current_x / self.k) ** self.n)
@@ -310,24 +314,40 @@ class Repressor:
             ]
         ).astype(np.float64)
 
-    def score_self(self):
+    def score_self(self, score_table: bool = False):
         '''
-        Function to score efficacy of a gate. Optimization methods call a
-        different function, this is purely for understanding the qualities of
-        the gate as written.
+        Function to score efficacy of a gate.
         '''
-        df = pd.DataFrame(columns=['x0', 'x1', 'inputs', 'response'])
-        # This makes a lot of assumptions about the problem size we're working
-        # with. It might be better to recurse backwards, detect all prior gates
-        # and then use the number of gates to determine the size of the logic
-        # table.
-        logical_inputs = list(itertools.product([0b0, 0b1], repeat=2))
+        df = pd.DataFrame(columns=['logical_input', 'biological_input', 'response'])
+        logical_inputs = list(itertools.product(
+            [0b0000, 0b1111],
+            repeat=self.number_of_inputs
+        ))
+        high_off = float('-inf')
+        low_on = float('inf')
         for logical_input in logical_inputs:
-            df_dict = {
-                'x0': logical_input[0],
-                'x1': logical_input[1],
-                'inputs': str(self.get_input_signals()),
-                'response': self.calculate_response_function(logical_input)
-            }
-            df = df.append(df_dict, ignore_index=True)
-        print(df)
+            self.set_logical_inputs([x for x in logical_input])
+            if self.number_of_inputs > 1:
+                for index, biological_input in enumerate(self.biological_inputs):
+                    if type(biological_input) == Repressor:
+                        biological_input.set_logical_inputs([logical_input[index]])
+            response = self.calculate_response_function()
+            # If this is True, our signal is high. If it is False, our signal
+            # is low. We use this to get the lowest one and highest off
+            # respectively.
+            if self.get_logical_output():
+                if response < low_on:
+                    low_on = response
+            if not self.get_logical_output():
+                if response > high_off:
+                    high_off = response
+            if score_table:
+                df_dict = {
+                    'logical_input': logical_input,
+                    'biological_input': str(self.get_input_signals()),
+                    'response': self.calculate_response_function()
+                }
+                df = df.append(df_dict, ignore_index=True)
+        if score_table:
+            print(df)
+        return np.log10(high_off / low_on)

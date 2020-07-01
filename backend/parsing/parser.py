@@ -130,4 +130,4 @@ def parse_verilog_file():
 
 
 if __name__ == '__main__':
-    parse_ucf_file('../../example_ucf.json')
+    parse_ucf_file('../../example_files/example_ucf.json')

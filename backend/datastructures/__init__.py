@@ -1,2 +1,5 @@
 from .library import Library
-from .repressor import Repressor
+from .repressor import (
+    InputSignal,
+    Repressor,
+)
