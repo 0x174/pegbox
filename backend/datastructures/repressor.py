@@ -282,25 +282,25 @@ class Repressor:
         if self.logical_function == LogicFunction.XNOR:
             return (~(computed_input_signals[0] ^ computed_input_signals[1])) & 0xF
 
-    def get_linear_coefficents(self) -> List[float]:
+    def get_linear_coefficients(self) -> List[float]:
         '''
-        Utility function to turn a Repressor into it's coefficents for the
+        Utility function to turn a Repressor into it's coefficients for the
         purpose of visualization.
 
         Returns:
-            A list of all linear coefficents which define the response function
+            A list of all linear coefficients which define the response function
             of a repressor.
         '''
         return [self.y_min, self.y_max, self.k, self.n]
 
-    def get_coefficents(self) -> np.ndarray:
+    def get_coefficients(self) -> np.ndarray:
         '''
-        Utility function to turn a repressor into it's coefficents for the
+        Utility function to turn a repressor into it's coefficients for the
         purpose of optimization.
 
         Returns:
-            A numpy array of all of the coefficents for the repressor. These
-            are represented in an ndarray of float64 to avoid floating point
+            A numpy array of coefficients for the repressor. These are
+            represented by an ndarray of float64 to avoid floating point
             error.
 
         '''
@@ -318,7 +318,11 @@ class Repressor:
         '''
         Function to score efficacy of a gate.
         '''
-        df = pd.DataFrame(columns=['logical_input', 'biological_input', 'response'])
+        df = pd.DataFrame(columns=[
+            'logical_input',
+            'biological_input',
+            'response'
+        ])
         logical_inputs = list(itertools.product(
             [0b0000, 0b1111],
             repeat=self.number_of_inputs

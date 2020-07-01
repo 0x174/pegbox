@@ -231,16 +231,12 @@ def test_optimize_repressor(
         generate_plux_star,
         generate_ptet,
 ):
-    '''
-
-    Returns:
-
-    '''
     s1 = generate_s1_gate
     ptet = generate_ptet
     s1.set_biological_inputs([ptet])
     s1.set_logical_function('NOT')
-
-    print(optimize_repressor(s1, 'Nelder-Mead'))
+    results = optimize_repressor(s1, 'Nelder-Mead')
+    assert results.x[0] == pytest.approx(0.197, 0.1)
+    assert results.x[1] == pytest.approx(2.65, 0.1)
 
 
