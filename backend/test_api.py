@@ -12,6 +12,7 @@ def instantiate_cello_api():
     return CelloAPI(username=USERNAME, password=PASSWORD)
 
 
+@pytest.mark.skip(reason="Hangs Indefinitely")
 def test_cello_auth_context_manager(instantiate_cello_api):
     cello_api = instantiate_cello_api
     with cello_api.auth as authentication_mechanism:

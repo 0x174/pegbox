@@ -238,5 +238,10 @@ def test_optimize_repressor(
     results = optimize_repressor(s1, 'Nelder-Mead')
     assert results.x[0] == pytest.approx(0.197, 0.1)
     assert results.x[1] == pytest.approx(2.65, 0.1)
+    p1 = generate_p1_gate
+    plux = generate_plux_star
+    p1.set_biological_inputs([plux, s1])
+    p1.set_logical_function('NOR')
+    results = optimize_repressor(p1, 'Nelder-Mead')
 
 

@@ -1,3 +1,8 @@
+"""
+backend.solvers.optimize_repressor
+
+W.R. Jackson 2020
+"""
 import copy
 from typing import Callable
 from functools import partial
@@ -56,8 +61,9 @@ def optimize_repressor(
 
     Args:
         input_repressor: The input to optimize.
-        optimization_method:
-        bio_optimization:
+        optimization_method: Which optimization method to use, either through
+            a global optimization method or through
+        bio_optimization: What parts of the repressor optimize.
 
     Returns:
 
@@ -212,7 +218,6 @@ def optimizable_response_function_dna_and_protein(
     # The negative sign is so we minimize a negative value, so we end up
     # maximizing the function.
     return -input_repressor.score_self()
-
 
 
 def simple_calculate_response_function(x, coefficients: list) -> float:

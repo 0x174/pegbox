@@ -1,3 +1,10 @@
+"""
+backend.datastructures.repressor
+
+Class encapsulating all behavior of a repressor/gate.
+
+W.R. Jackson 2020
+"""
 import dataclasses
 
 

@@ -1,4 +1,13 @@
+"""
+backend.datastructures.repressor
+
+Class encapsulating all behavior of a repressor/gate.
+
+W.R. Jackson 2020
+"""
 import argparse
+
+from backend import parse_ucf_file
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
@@ -16,6 +25,10 @@ if __name__ == '__main__':
         raise RuntimeError('Missing UCF File')
     if args.input_verilog is None:
         raise RuntimeError('Missing Verilog File')
+
+    parse_ucf_file(args.input_ucf)
+
+
 
 
 
